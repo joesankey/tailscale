@@ -24,6 +24,7 @@ const (
 	chainNameForward     = "ts-forward"
 	chainNameInput       = "ts-input"
 	chainNamePostrouting = "ts-postrouting"
+	chainNamePrerouting  = "ts-prerouting"
 )
 
 type chainInfo struct {
@@ -410,6 +411,9 @@ func (n *nftablesRunner) AddChains() error {
 		table.Nat = nat
 		if err = createChainIfNotExist(n.conn, chainInfo{nat, chainNamePostrouting, nftables.ChainTypeNAT, nftables.ChainHookPostrouting, nftables.ChainPriorityNATDest}); err != nil {
 			return fmt.Errorf("create postrouting chain: %w", err)
+		}
+		if err = createChainIfNotExist(n.conn, chainInfo{nat, chainNamePrerouting, nftables.ChainTypeNAT, nftables.ChainHookPrerouting, nftables.ChainPriorityNATDest}); err != nil {
+			return fmt.Errorf("create prerouting chain: %w", err)
 		}
 	}
 

@@ -497,10 +497,7 @@ func installIPTablesRule(ctx context.Context, dstStr string, tsIPs []netip.Prefi
 	if err != nil {
 		return err
 	}
-	argv0 := "iptables"
-	if dst.Is6() {
-		argv0 = "ip6tables"
-	}
+
 	var local string
 	for _, pfx := range tsIPs {
 		if !pfx.IsSingleIP() {
@@ -518,7 +515,7 @@ func installIPTablesRule(ctx context.Context, dstStr string, tsIPs []netip.Prefi
 	// Technically, if the control server ever changes the IPs assigned to this
 	// node, we'll slowly accumulate iptables rules. This shouldn't happen, so
 	// for now we'll live with it.
-	cmd := exec.CommandContext(ctx, argv0, "-t", "nat", "-I", "PREROUTING", "1", "-d", local, "-j", "DNAT", "--to-destination", dstStr)
+	cmd := exec.CommandContext(ctx, "nft", "add", "rule", "ip", "ts-nat", "ts-prerouting", "ip", "daddr", local, "dnat", dstStr)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
